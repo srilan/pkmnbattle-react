@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PinkButton from "./components/PinkButton";
 import { Pokemon } from "./interfaces/Pokemon";
+import { PokemonList } from "./interfaces/PokemonList";
 
 
 const PokeReact = () => {
@@ -8,18 +9,29 @@ const PokeReact = () => {
   const [pokemonName2, setPokemonName2] = useState<string>("");
   const [pokemon1Data, setPOkemon1Data] = useState<Pokemon | null>(null);
   const [pokemon2Data, setPOkemon2Data] = useState<Pokemon | null>(null);
+  const [pokemonList, setPokemonList] = useState<PokemonList | null>(null);
 
   const [hasFightResults, setHasFightResults] = useState<boolean>(false);
   const [pkmn1Hp, setPkmn1Hp] = useState(0);
   const [pkmn2Hp, setPkmn2Hp] = useState(0);
 
+  useEffect(()=> {
+    listPokemon();
+  }, [])
+
+  const listPokemon = async () => {
+    const fetchJson = await fetch("http://localhost:3000/api/pokemon/list");
+    const listData = await fetchJson.json();
+    setPokemonList(listData);
+  }
+
   const selectPokemon = async () => {
-    const fetchJson = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName1}`);
+    const fetchJson = await fetch(`http://localhost:3000/api/pokemon/get?name=${pokemonName1}`);
     const pokemonData = await fetchJson.json();
     setPOkemon1Data(pokemonData);
   }
   const selectPokemon2 = async () => {
-    const fetchJson = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName2}`);
+    const fetchJson = await fetch(`http://localhost:3000/api/pokemon/get?name=${pokemonName2}`);
     const pokemonData = await fetchJson.json();
     setPOkemon2Data(pokemonData);
   }
@@ -70,6 +82,23 @@ const PokeReact = () => {
           </div>
         }
         <input type="" placeholder="Pokemon" value={pokemonName2} onChange={(e)=>setPokemonName2(e.target.value)}/>
+        {
+          pokemonList && (
+            <>
+              <select
+                onChange={(e)=>setPokemonName2(e.target.value)}
+              >
+                {
+                  pokemonList.results.map((pokemon)=>{
+                    return <option value={pokemon.name}>
+                      {pokemon.name}
+                    </option>
+                  })
+                }
+              </select>
+            </>
+          )
+        }
         <PinkButton  buttonClick={selectPokemon2} label="Select Pokemon"/>
 
       </div>
